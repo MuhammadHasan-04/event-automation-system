@@ -1,78 +1,142 @@
-# Real-Time AI Event Automation System
+# Plug-and-play AI Event Automation System
 
-A full-stack event-driven AI automation system that processes incoming messages, classifies them using large language models, triggers automated workflows, and displays results in a real-time dashboard.
-
-The system acts as an automation platform for business events, combining artificial intelligence, workflow automation, and live data visualization into a single pipeline.
+A configurable AI automation framework that plugs into your stack. Clone it, set your environment variables, connect Supabase + n8n, and you get a real-time AI event dashboard with workflow automation.
 
 ## Overview
 
-This system takes unstructured input events such as customer messages or system alerts and converts them into structured actions using AI. These structured outputs are then used to trigger automated workflows and store results in a database for real-time monitoring.
+This system turns unstructured input into structured AI events, triggers workflows, stores results in Supabase, and streams updates to the dashboard.
 
-The goal is to simulate an operating system for business automation where events are processed, classified, stored, and acted upon automatically.
+## System workflow
 
-## System Workflow
-
-User or external event input is received by the frontend or API layer.  
-The request is forwarded to a backend endpoint which communicates with a workflow automation engine.  
-The workflow engine processes the request and sends it to an AI model for classification.  
-The AI model returns a structured response containing intent, priority, and action.  
-This data is stored in a database and reflected instantly in the dashboard using real-time updates.
+- Receive an external event (API, webhook, or UI)
+- Forward to workflow automation engine
+- Classify via AI model (intent, priority, action)
+- Store event in Supabase
+- Stream updates to the dashboard
 
 ## Features
 
-AI-based event classification that extracts intent, priority, and required action from text input
+- AI-based event classification (intent, priority, action)
+- n8n workflow orchestration
+- Real-time dashboard updates via Supabase
+- Priority-based event filtering
+- API-driven event ingestion
 
-Workflow automation using external orchestration system for triggering actions
+## Tech stack
 
-Real-time dashboard that updates automatically when new events are received
+- Next.js (App Router)
+- React 19
+- Supabase (database + realtime)
+- n8n (workflow automation)
+- LLM providers (OpenRouter or compatible APIs)
 
-Priority-based event handling that separates high and low importance events
+## Setup instructions
 
-Event logging and storage for tracking and monitoring system activity
+### 1. Clone the project
 
-API-driven architecture that allows external systems to trigger events
+```bash
+git clone <repo-url>
+cd ai-automation-os
+```
 
-## Tech Stack
+### 2. Install dependencies
 
-Frontend built with Next.js and React
+```bash
+npm install
+```
 
-Backend built using Next.js API routes
+### 3. Configure environment variables
 
-Database powered by Supabase with real-time subscriptions
+Create a `.env.local` file using [.env.example](.env.example) as a template.
 
-Workflow automation handled by n8n
+```bash
+cp .env.example .env.local
+```
 
-AI processing performed using large language model APIs
+You must configure:
 
-## How It Works
+- AI provider and model (OpenRouter or other LLM provider)
+- Supabase project credentials
+- n8n webhook URL
 
-A message is received through an API endpoint or user interface.  
-The message is forwarded to a workflow automation engine.  
-The engine sends the message to an AI model for classification.  
-The AI model returns structured data including intent, priority, and action.  
-The structured event is stored in the database.  
-The dashboard listens to database changes and updates in real time.
+### 4. Supported AI models
 
-## Example Event Output
+Use any model supported by your provider. Example models:
 
-The system converts raw input into structured data in the following format:
+- openai/gpt-4o-mini
+- anthropic/claude-3-haiku
+- baidu/cobuddy-20260430:free
+- meta-llama models (if supported)
 
+### 5. Supabase setup
+
+Create the `events` table:
+
+```sql
+create table events (
+	id uuid primary key default gen_random_uuid(),
+	intent text,
+	priority text,
+	action text,
+	message text,
+	status text,
+	created_at timestamp default now()
+);
+```
+
+### 6. Run the project
+
+```bash
+npm run dev
+```
+
+Open [http://localhost:3000](http://localhost:3000).
+
+## Environment variables
+
+The client uses public variables prefixed with `NEXT_PUBLIC_`. The server uses private variables that should never be exposed to the browser.
+
+```env
+# AI PROVIDER
+AI_PROVIDER=openrouter
+AI_MODEL=baidu/cobuddy-20260430:free
+AI_API_KEY=your_ai_api_key_here
+
+# SUPABASE (server)
+SUPABASE_URL=https://your-project.supabase.co
+SUPABASE_SERVICE_ROLE_KEY=your_supabase_service_role_key_here
+
+# SUPABASE (client)
+NEXT_PUBLIC_SUPABASE_URL=https://your-project.supabase.co
+NEXT_PUBLIC_SUPABASE_ANON_KEY=your_supabase_anon_key_here
+
+# N8N WORKFLOW
+N8N_WEBHOOK_URL=https://your-n8n-url/webhook/ai-process
+
+# APP CONFIG
+APP_NAME=AI Event Automation System
+```
+
+## Example event output
+
+```json
 {
-  intent: refund_request,
-  priority: high,
-  action: process_refund,
-  message: Customer wants refund urgently
+	"intent": "refund_request",
+	"priority": "high",
+	"action": "process_refund",
+	"message": "Customer wants refund urgently"
 }
+```
 
-## Use Cases
+## Use cases
 
-Customer support automation and ticket classification
+- Customer support automation and ticket classification
+- Refund and complaint handling systems
+- Business event monitoring dashboards
+- AI-powered operational workflows
+- Automated decision-making pipelines
 
-Refund and complaint handling systems
+## Notes
 
-Business event monitoring dashboards
-
-AI-powered operational workflows
-
-Automated decision-making pipelines
-
+- `SUPABASE_SERVICE_ROLE_KEY` is for server-side use only. Never expose it in the browser.
+- `NEXT_PUBLIC_SUPABASE_ANON_KEY` is safe for client usage.

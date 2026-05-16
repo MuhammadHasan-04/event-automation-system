@@ -3,21 +3,29 @@ import { NextResponse } from "next/server";
 export async function POST(req) {
   try {
     const body = await req.json();
+    const webhookUrl = process.env.N8N_WEBHOOK_URL;
 
-    const n8nResponse = await fetch(
-      "https://psyco.app.n8n.cloud/webhook/ai-process",
-      {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
+    if (!webhookUrl) {
+      return NextResponse.json(
+        {
+          success: false,
+          error: "Missing N8N_WEBHOOK_URL",
         },
-        body: JSON.stringify({
-          message: body.message,
-          source: "nextjs-backend",
-          timestamp: new Date().toISOString(),
-        }),
+        { status: 500 },
+      );
+    }
+
+    const n8nResponse = await fetch(webhookUrl, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
       },
-    );
+      body: JSON.stringify({
+        message: body.message,
+        source: "nextjs-backend",
+        timestamp: new Date().toISOString(),
+      }),
+    });
 
     const data = await n8nResponse.json();
 
