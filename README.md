@@ -76,18 +76,3 @@ AI-powered operational workflows
 
 Automated decision-making pipelines
 
-## Future Improvements
-
-Advanced analytics and reporting dashboard
-
-Multi-tenant support for SaaS scaling
-
-Retry and failure handling mechanisms for workflows
-
-Role-based access control system
-
-Custom workflow builder for non-technical users
-
-## License
-
-This project is intended for educational and portfolio purposes.
