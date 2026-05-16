@@ -1,0 +1,260 @@
+{
+  "name": "AI Automation System (MINI Zapier)",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "ai-process",
+        "responseMode": "lastNode",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        0,
+        -16
+      ],
+      "id": "964c7eb9-b9e6-408f-87a4-ab120b34384d",
+      "name": "Webhook",
+      "webhookId": "98a95c79-7c37-43b1-b900-8c2f34988514"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://openrouter.ai/api/v1/chat/completions",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "Bearer {{OPENROUTER_API_KEY}}"
+            },
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"model\": \"baidu/cobuddy:free\",\n  \"messages\": [\n    {\n      \"role\": \"system\",\n      \"content\": \"You are an automation AI. Return ONLY valid JSON.\"\n    },\n    {\n      \"role\": \"user\",\n      \"content\": \"Classify this message into JSON with keys: intent, priority, action. Message: {{$json.body.message}}\"\n    }\n  ]\n}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        224,
+        -16
+      ],
+      "id": "da849e90-d91f-43c8-ae46-2466837a5c0b",
+      "name": "HTTP Request"
+    },
+    {
+      "parameters": {
+        "jsCode": "let content = $json[\"choices\"][0][\"message\"][\"content\"];\n\nconst match = content.match(/\\{[\\s\\S]*\\}/);\n\nif (!match) {\n  throw new Error(\"No valid JSON found in AI response\");\n}\n\nreturn [\n  {\n    json: JSON.parse(match[0])\n  }\n];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        448,
+        -16
+      ],
+      "id": "c7d2d1ad-8aa4-4bb4-8e35-f3469084ebad",
+      "name": "Code in JavaScript"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://dyslexia-craftsman-dramatic.ngrok-free.dev/api/events",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Content-Type",
+              "value": " application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"intent\": \"{{$json.intent}}\",\n  \"priority\": \"{{$json.priority}}\",\n  \"action\": \"{{$json.action}}\",\n  \"message\": \"{{$node['Webhook'].json['body']['message']}}\"\n}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        896,
+        -112
+      ],
+      "id": "4603b33f-1a3a-4186-b519-5d9a41cffdc9",
+      "name": "HTTP Request1"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "2e4d4844-1053-4ba4-a638-fe0e060ebe6c",
+              "leftValue": "={{ $json.priority }}",
+              "rightValue": "high",
+              "operator": {
+                "type": "string",
+                "operation": "equals",
+                "name": "filter.operator.equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {
+          "ignoreCase": false
+        }
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        672,
+        -16
+      ],
+      "id": "9e2dab0c-7fbe-4acf-aada-329f55f97368",
+      "name": "If"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://dyslexia-craftsman-dramatic.ngrok-free.dev/api/events",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Content-type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"intent\": \"{{$json.intent}}\",\n  \"priority\": \"{{$json.priority}}\",\n  \"action\": \"{{$json.action}}\",\n  \"message\": \"{{$node['Webhook'].json['body']['message']}}\",\n  \"status\": \"logged_low_priority\"\n}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        896,
+        80
+      ],
+      "id": "c705e4cd-787a-41e7-ad35-f6eecea1b99b",
+      "name": "HTTP Request2"
+    },
+    {
+      "parameters": {
+        "sendTo": "ha7971768@gmail.com",
+        "subject": "=High Priority AI Alert: {{$json.intent}}",
+        "emailType": "text",
+        "message": "=A high priority event was detected.  \nIntent: {{$json.intent}} \nPriority: {{$json.priority}}  \nMessage: {{$node[\"Webhook\"].json[\"body\"][\"message\"]}}  \n\nAction required immediately.",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.2,
+      "position": [
+        1120,
+        -112
+      ],
+      "id": "e6e4cc43-4541-4da6-8199-de22669f83fa",
+      "name": "Send a message",
+      "webhookId": "f76a941b-6e4b-462e-9498-4f1f0e89cf8d",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "OU7lb8NzjLTdXY4n",
+          "name": "Gmail OAuth2 API"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTTP Request": {
+      "main": [
+        [
+          {
+            "node": "Code in JavaScript",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code in JavaScript": {
+      "main": [
+        [
+          {
+            "node": "If",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request1",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "HTTP Request2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTTP Request1": {
+      "main": [
+        [
+          {
+            "node": "Send a message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate",
+    "timeSavedMode": "fixed",
+    "callerPolicy": "workflowsFromSameOwner",
+    "availableInMCP": false
+  },
+  "versionId": "dfaf58f0-f4ba-4e40-8625-9c9164f417af",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "7aee372b2db47ec98261d9eb28fe1edb586a86893c2cbf6a0cf36ffc0d93731d"
+  },
+  "id": "2HkWcxlTfcgAHca5",
+  "tags": []
+}
