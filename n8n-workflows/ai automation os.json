@@ -27,7 +27,7 @@
           "parameters": [
             {
               "name": "Authorization",
-              "value": "Bearer {{OPENROUTER_API_KEY}}"
+              "value": "Bearer {{$env.OPENROUTER_API_KEY}}"
             },
             {
               "name": "Content-Type",
@@ -37,7 +37,7 @@
         },
         "sendBody": true,
         "specifyBody": "json",
-        "jsonBody": "={\n  \"model\": \"baidu/cobuddy:free\",\n  \"messages\": [\n    {\n      \"role\": \"system\",\n      \"content\": \"You are an automation AI. Return ONLY valid JSON.\"\n    },\n    {\n      \"role\": \"user\",\n      \"content\": \"Classify this message into JSON with keys: intent, priority, action. Message: {{$json.body.message}}\"\n    }\n  ]\n}",
+        "jsonBody": "={\n  \"model\": \"{{$env.AI_MODEL}}\",\n  \"messages\": [\n    {\n      \"role\": \"system\",\n      \"content\": \"You are an automation AI. Return ONLY valid JSON.\"\n    },\n    {\n      \"role\": \"user\",\n      \"content\": \"Classify this message into JSON with keys: intent, priority, action. Message: {{$json.body.message}}\"\n    }\n  ]\n}",
         "options": {}
       },
       "type": "n8n-nodes-base.httpRequest",
@@ -65,7 +65,7 @@
     {
       "parameters": {
         "method": "POST",
-        "url": "https://dyslexia-craftsman-dramatic.ngrok-free.dev/api/events",
+        "url": "{{$env.BACKEND_URL}}/api/events",
         "sendHeaders": true,
         "headerParameters": {
           "parameters": [
@@ -128,7 +128,7 @@
     {
       "parameters": {
         "method": "POST",
-        "url": "https://dyslexia-craftsman-dramatic.ngrok-free.dev/api/events",
+        "url": "{{$env.BACKEND_URL}}/api/events",
         "sendHeaders": true,
         "headerParameters": {
           "parameters": [
@@ -154,7 +154,7 @@
     },
     {
       "parameters": {
-        "sendTo": "ha7971768@gmail.com",
+        "sendTo": "{{$env.ALERT_EMAIL}}",
         "subject": "=High Priority AI Alert: {{$json.intent}}",
         "emailType": "text",
         "message": "=A high priority event was detected.  \nIntent: {{$json.intent}} \nPriority: {{$json.priority}}  \nMessage: {{$node[\"Webhook\"].json[\"body\"][\"message\"]}}  \n\nAction required immediately.",
