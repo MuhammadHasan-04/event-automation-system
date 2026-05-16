@@ -1,4 +1,4 @@
-# Plug-and-play AI Event Automation System
+#  AI Event Automation System
 
 A configurable AI automation framework that plugs into your stack. Clone it, set your environment variables, connect Supabase + n8n, and you get a real-time AI event dashboard with workflow automation.
 
